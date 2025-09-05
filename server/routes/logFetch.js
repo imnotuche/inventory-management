@@ -17,7 +17,6 @@ router.get("/sales/:id", async(req, res)=>{
 
 });
 
-
 router.get("/activity", async(req, res)=>{
 
     try {

@@ -153,15 +153,15 @@ module.exports=function(io){
                 });
 
                 io.emit("itemAdded");
-                io.emit("logUpdate");
-                io.emit("updateStaffMetric", {
-                    staffId: req.body.saleLog.staffId
-                });
 
             }
             
             await logSale(req.body.saleLog);
-            await logActivity(req.body.activityLog)
+            await logActivity(req.body.activityLog);
+            io.emit("logUpdate");
+            io.emit("updateStaffMetric", {
+                staffId: req.body.saleLog.staffId
+            });
             res.status(200).json({message: `Payment successful`});
 
         } catch (err) {

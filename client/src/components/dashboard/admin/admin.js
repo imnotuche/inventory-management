@@ -36,23 +36,17 @@ export function useAdmin(){
         });
 
         getActivityLogs();
-
         socket.on("logUpdate", () => {
             getActivityLogs();
         });
 
         getTotalMetrics(totalMetricRange.value);
-
         socket.on("metricUpdated", ()=>{
-            
             getTotalMetrics(totalMetricRange.value);
-          
         });
 
         socket.on("updateStaffMetric", (data)=>{
-            
             staff.getStaffList();
-          
         });
 
     });

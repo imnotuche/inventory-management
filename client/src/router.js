@@ -11,6 +11,11 @@ import api from "./components/api";
 const routes=[
 
     {
+        path: '/',
+        redirect: '/dashboard'
+    },
+
+    {
         path: '/login',
         name: 'Login',
         component: Login

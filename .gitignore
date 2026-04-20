@@ -1,3 +1,5 @@
+.gitignore
+
 # dependencies
 node_modules/
 
@@ -20,5 +22,41 @@ dist/
 build/
 
 # local database files (if they're generated data)
-files/activity logs*
-files/staff logs*
+
+# Ignore this file itself (for clarity in templates)
+.gitignore
+
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# logs
+logs/
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# build outputs (if any)
+dist/
+build/
+
+# Local database files (if they're generated data)
+
+# --- Important: Do not track the `files/` directory ---
+# This repo stores application logs, uploads, and DB files under `files/`.
+# Ensure nothing inside `files/` is tracked by Git.
+files/
+
+# If any files under `files/` were already committed, run these commands to
+# untrack them (run in repository root):
+#
+# git rm -r --cached files/
+# git commit -m "chore: stop tracking files/ directory"
+

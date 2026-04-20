@@ -7,4 +7,4 @@ if not exist %DBPATH% (
 )
 
 mongod --port %PORT% --dbpath %DBPATH%
-pause 
+pause

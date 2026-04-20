@@ -7,6 +7,7 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 const { listRecords, updateRecord } = require("./modules/database");
 const {logActivity}=require("./modules/fileStorage");
+const {addSeed} = require("./modules/seed")
 
 //routes
 const user = require("./routes/auth/user");
@@ -15,6 +16,8 @@ const logFetch=require("./routes/logFetch");
 
 const port = process.env.PORT;
 const app = express();
+
+addSeed();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

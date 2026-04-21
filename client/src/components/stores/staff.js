@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import api from "../api";
-import { useFeedbackStore } from "./feedback";
+import { useAuthStore } from "./auth";
 
 export const useStaffStore = defineStore("staff", {
     state: () => ({
         salesStaff: [],
+        currentStaffRemove: {},
     }),
 
     getters: {},
@@ -12,25 +13,27 @@ export const useStaffStore = defineStore("staff", {
     actions: {
 
         async getStaffMetric(id, range) {
-           try{
-                 const response =await api.get(`/key-metrics/metric/${id}/${range}`);
+            try{
+                const response =await api.get(`/key-metrics/metric/${id}/${range}`);
                 console.log(response.data);
                 const staff=this.salesStaff.find((x)=>x.staffId===id);
                 if(staff){
                     staff.totalOrders = response.data.result?.totalOrders ?? 0;
                     staff.totalRevenue = response.data.result?.totalRevenue ?? 0;
                 }
-           } catch(err){
+            } catch(err){
             console.log(err);
-           }
+            }
         },
 
         async getStaffList() {
             try {
+                const auth = useAuthStore();
+                const selfId = auth.getStaffId;
                 const response = await api.get("auth/admin/list-users");
                 this.salesStaff = response.data.result
                     .filter((item) => {
-                        return item.role === "sales";
+                        return item.staffId !== selfId;
                     })
                     .sort((a, b) => {
                         if (a.online !== b.online) {

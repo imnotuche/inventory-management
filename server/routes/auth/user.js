@@ -54,19 +54,26 @@ router.get('/list-users', async(req, res)=>{
 });
 
 
-/*router.delete('/remove-user', async(req, res)=>{
+router.delete('/remove-user', async(req, res)=>{
 
     try{
 
-        await deleteRecord("users", req.body.filter);
-        console.log(`Successfully removed user with filter: ${req.body.filter}`);
-        res.status(200).json({message: "Successfully removed user"});
+        console.log(req.body)
+        admin = await findRecord("users", {staffId: req.body.self.staffId});
+        if(!admin) return res.status(404).json({message: `Unable to find admin credentials`});
+
+        passwordMatch = await bcrypt.compare(req.body.self.password, admin.password);
+        if(!passwordMatch) return res.status(403).json({message: `Incorrect password`});
+
+        await deleteRecord("users", {staffId: req.body.saleStaff.staffId});
+        console.log(`Successfully removed user`);
+        res.status(200).json({message: `Successfully removed ${req.body.saleStaff.name}`});
 
     }catch(err){
         console.log(err);
     }
 
-});*/
+});
 
 
 module.exports=router;

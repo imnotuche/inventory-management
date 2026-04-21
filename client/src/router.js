@@ -1,6 +1,7 @@
 import {createRouter, createWebHistory} from "vue-router";
 import Login from "./components/login/login.vue";
 import AddStaff from "./components/addStaff/addStaff.vue"
+import RemoveStaff from "./components/removeStaff/removeStaff.vue";
 import Dashboard from  "./components/dashboard/dashboard.vue";
 import AddStock from "./components/addStock/addStock.vue";
 
@@ -25,6 +26,13 @@ const routes=[
         path: '/add-staff',
         name: 'Add-Staff',
         component: AddStaff,
+        meta: { requiresAuth: true }
+    },
+
+    {
+        path: '/remove-staff',
+        name: 'Remove-Staff',
+        component: RemoveStaff,
         meta: { requiresAuth: true }
     },
 

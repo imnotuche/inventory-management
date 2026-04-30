@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, ref, computed } from "vue";
+import { onBeforeUnmount, onMounted, ref, computed, watch } from "vue";
 import { useStockStore } from "../../stores/stock";
 import { useAuthStore } from "../../stores/auth";
 import { useFeedbackStore } from "../../stores/feedback";
@@ -9,6 +9,7 @@ export function useSales() {
     const stock = useStockStore();
     const auth = useAuthStore();
     const feedback=useFeedbackStore();
+    const query = ref("");
     const saleItems = ref([]);
     const itemQuantity = ref(1);
     const saleTotal = computed(() => {
@@ -84,6 +85,16 @@ export function useSales() {
     onBeforeUnmount(() => {
         socket.off("itemAdded");
         socket.off("logUpdate");
+    });
+
+    let timeout;
+    watch(query, (newVal, oldVal)=>{
+        if(newVal===oldVal) return;
+        if(!newVal) stock.getStocks();
+        clearTimeout(timeout)
+        timeout = setTimeout(()=>{
+            stock.getQuery(newVal);
+        }, 500);
     });
 
     function addSaleItem(item, quantity) {
@@ -166,6 +177,7 @@ export function useSales() {
     }
 
     return {
+        query,
         saleItems,
         itemQuantity,
         saleTotal,

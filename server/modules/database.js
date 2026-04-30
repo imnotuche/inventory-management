@@ -89,7 +89,7 @@ async function findRecord(collectionName, filter) {
     try{
 
         const dataBase=await connect();
-        return await db.collection(collectionName).findOne(filter);
+        return await dataBase.collection(collectionName).findOne(filter);
 
     } catch(err){
         console.log(err);

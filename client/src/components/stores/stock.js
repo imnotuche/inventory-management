@@ -44,5 +44,16 @@ export const useStockStore = defineStore("stock", {
 
         },
 
+        async getQuery(query) {
+
+            try{
+                const response = await api.get(`/inventory/return-search/${query}`);
+                this.stocks=response.data.result;
+            }catch(err){
+                console.log(err);
+            }
+
+        },
+
     },
 });

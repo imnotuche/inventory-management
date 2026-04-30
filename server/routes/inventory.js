@@ -1,11 +1,14 @@
 //this file contains routes for CRUD processes
 
+const { search } = require("./auth/user");
+
 module.exports=function(io){
 
     
     //required modules
     const express=require("express");
     const {
+        connect,
         addRecord, 
         listRecords,
         updateRecord,
@@ -99,6 +102,28 @@ module.exports=function(io){
         }
 
     });
+
+    //this route returns search results of items
+    router.get('/return-search/:query', async (req, res)=>{
+
+        try{
+
+            const query = req.params.query;
+            const dataBase = await connect ();
+            items = await dataBase.collection("items").find({
+                $or: [
+                    {name: {$regex: query, $options: 'i'}},
+                    {sku: {$regex: query, $options: 'i'}}
+                ]
+            }).toArray();
+            return res.status(200).json({message: "success", result: items});
+
+        }catch(err){
+            console.log(err);
+            return res.status(500).json({message: `Server error`});
+        }
+
+    })
 
     //to update properties of inventory items
     router.put('/update-item', async(req, res)=>{

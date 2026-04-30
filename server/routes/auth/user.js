@@ -66,6 +66,7 @@ router.delete('/remove-user', async(req, res)=>{
         if(!passwordMatch) return res.status(403).json({message: `Incorrect password`});
 
         await deleteRecord("users", {staffId: req.body.saleStaff.staffId});
+        await logActivity(req.body.log);
         console.log(`Successfully removed user`);
         res.status(200).json({message: `Successfully removed ${req.body.saleStaff.name}`});
 

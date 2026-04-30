@@ -34,7 +34,7 @@ export function useAddStaff(){
             const log={
                 staffId: auth.getStaffId,
                 name: auth.getStaffName,
-                action: "addStaff",
+                action: `add ${firstName.value} ${lastName.value} as ${role.value}`,
                 role: auth.getUserRole,
                 added: staff,
             }

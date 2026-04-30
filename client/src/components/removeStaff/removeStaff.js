@@ -30,9 +30,18 @@ export function useRemoveStaff(){
             name: staff.currentStaffRemove.name
         }
 
+        const logName = `${staff.currentStaffRemove.name.toLowerCase()}`;
+
+        const log={
+            staffId: auth.getStaffId,
+            name: auth.getStaffName,
+            action: `remove ${logName}`,
+            role: auth.getUserRole,
+        }
+
         try{
 
-            const response=await api.delete('auth/admin/remove-user', {data: {self, saleStaff}});
+            const response=await api.delete('auth/admin/remove-user', {data: {self, saleStaff, log}});
             console.log(response);
             feedback.addNotification("success", response.data.message)
             if(response.status===200) router.push("/dashboard");

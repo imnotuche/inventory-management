@@ -1,35 +1,104 @@
-# Inventory Management / Point of Sale App
+# Inventory Management System
 
-A full-stack inventory management and point of sale (POS) system with real-time updates using **Vue 3 (Vite)** for the frontend, **Node.js + Express** for the backend, and **MongoDB** for the database.
-
-This is my **second fullstack project**, so some features (like staff/inventory update or delete) weren't implemented.
+A full-stack point of sale (POS) and inventory management platform with real-time updates. Enables role-based user management, sales tracking, stock control, and activity logging across distributed team members using WebSocket communication.
 
 ---
 
 ## Features
 
-### 🔑 Authentication
-- Role-based login system (`admin` and `sales`)
-- Heartbeat system to track online status
-- Password for **all accounts** is `1234`
-- Pre-seeded accounts:
-  - **Admins**: `stf001`, `stf004`
-  - **Sales**: `stf002`, `stf003`, `stf005`
-- Only **admins** can create new staff
+- **Role-based Authentication**: Admin and sales user roles with JWT-based session management and single-device session enforcement (prevents simultaneous logins from multiple devices/browsers)
+- **Online Status Tracking**: Real-time presence detection with last-seen timestamps, online/offline indicators, and automatic status broadcasts via WebSocket
+- **Activity Logging**: Comprehensive file-based audit trail for logins, logouts, staff management, and sales transactions with timestamps
+- **Admin Dashboard**: Revenue metrics, daily activity feed, staff performance tracking, and low-stock alerts
+- **Sales Dashboard**: Product catalog management, transaction metrics, daily sales history, and instant inventory synchronization
+- **Inventory Management**: SKU-based product tracking with batch cost management, quantity monitoring, and average cost price calculation
+- **Staff Management**: User creation and deletion (admins only), role assignment, and per-staff performance metrics
+- **Real-time Synchronization**: WebSocket-driven updates for metrics, catalog changes, online status, and activity logs across all connected clients
 
-### 📊 Admin Dashboard
-- Metrics: Total Revenue, Total Sales, Average Order, Low Stock
-- Recent Activity feed (login, add staff, logout, sale) for the current day
-- Staff Overview: Shows all registered staff with their total orders and revenue for the current day
+---
 
-### 💸 Sales Dashboard
-- Product Catalog: Select products + quantity for sale
-- Metrics: Total Revenue, Orders, Avg Order, Total Items Sold
-- Recent Daily Sales feed
-- Catalog updates instantly after a sale
+## Tech Stack
 
-### ⚡ Real-Time Updates
-- All metrics, online status, and catalog changes are updated instantly with **WebSockets**
+**Frontend**
+- Vue 3, Vite, Vue Router, Pinia (state management), Socket.io-client
+
+**Backend**
+- Node.js, Express 5, Socket.io, MongoDB, bcrypt, JWT, CORS, cookie-parser, dotenv
+
+**Database**
+- MongoDB (local instance with WiredTiger engine)
+
+---
+
+## Installation & Usage
+
+### Prerequisites
+- Node.js (v16 or higher)
+- MongoDB (local or remote instance)
+- npm
+
+### Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd inventory-management
+   ```
+
+2. **Install server dependencies**
+   ```bash
+   cd server
+   npm install
+   ```
+
+3. **Configure environment variables**
+   
+   Create a `.env` file in the `server/` directory:
+   ```env
+   PORT=3000
+   FRONTEND_ORIGIN=http://localhost:5173
+   MONGODB_URI=mongodb://localhost:27017/inventory
+   JWT_SECRET=your-secret-key
+   ```
+
+4. **Initialize the database**
+   ```bash
+   # From server/ directory
+   npm start
+   ```
+   This will seed the database with a default admin account.
+
+5. **Install client dependencies** (in a new terminal)
+   ```bash
+   cd client
+   npm install
+   ```
+
+6. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+   The frontend will be available at `http://localhost:5173`
+
+### Running the Application
+
+**Terminal 1 - Backend:**
+```bash
+cd server
+npm start
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd client
+npm run dev
+```
+
+**Ensure MongoDB is running** on the configured URI.
+
+### Default Credentials
+- **Admin account**: `test` (password: `test`)
+- Additional staff accounts can be created by admins through the application
 
 ---
 
@@ -37,17 +106,68 @@ This is my **second fullstack project**, so some features (like staff/inventory 
 
 ```
 inventory-management/
-├── client/          # Vue 3 + Vite frontend
-├── server/          # Node.js + Express backend
-└── files/           # Required folder (sibling of client & server)
+├── client/                    # Vue 3 + Vite frontend application
+│   ├── src/
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── login/         # Authentication interface
+│   │   │   ├── dashboard/     # Admin and sales dashboards
+│   │   │   ├── addStock/      # Inventory item creation
+│   │   │   ├── addStaff/      # User management
+│   │   │   ├── stores/        # Pinia state stores (auth, staff, stock, feedback)
+│   │   │   └── api.js         # API client utilities
+│   │   ├── router.js          # Vue Router configuration
+│   │   ├── socket.js          # Socket.io client setup
+│   │   └── main.js            # Application entry point
+│   └── vite.config.js         # Vite build configuration
+│
+├── server/                    # Node.js + Express backend
+│   ├── modules/
+│   │   ├── database.js        # MongoDB operations (CRUD)
+│   │   ├── fileStorage.js     # Activity and sales logging
+│   │   └── seed.js            # Database initialization
+│   ├── routes/
+│   │   ├── inventory.js       # Stock management endpoints
+│   │   ├── keyMetrics.js      # Analytics and dashboard metrics
+│   │   ├── logFetch.js        # Log retrieval endpoints
+│   │   └── auth/              # Authentication routes (login, logout, user info)
+│   ├── server.js              # Express app and WebSocket setup
+│   └── package.json           # Backend dependencies
+│
+├── files/                     # Data storage directory
+│   ├── activity logs/         # System activity and user action logs
+│   ├── staff logs/            # Individual staff member activity records
+│   └── database/              # MongoDB local data files (WiredTiger)
+│
+└── README.md                  # This file
 ```
 
 ---
 
-## Prerequisites
+## Key Implementation Details
 
-- Node.js (v16+ recommended)
-- npm or yarn
+### Session Management & Single-Device Enforcement
+- Only one active session per user across all devices/browsers
+- Login attempt fails with `"User active on another device / browser"` if user is already online
+- All clients must logout before logging in again from a different device
+
+### Online Presence & Offline Duration Tracking
+- Each user has `online` (boolean) and `lastSeen` (timestamp) fields in the database
+- Active sessions send heartbeat pings via `/api/auth/ping/{staffId}` to update `lastSeen`
+- All connected clients receive `activeStateChange` WebSocket events when online status changes
+- Clients can calculate offline duration: `currentTime - lastSeen`
+
+### Activity Logging & Audit Trail
+- All actions logged to date-stamped files in `files/activity logs/`
+- Activity types tracked: login, logout, staff creation, staff deletion, sales
+- Per-staff sales logs stored in `files/staff logs/{staffId}/sales-{date}.log`
+- Each log entry includes timestamp, user info, action type, and metadata (staff ID, role, etc.)
+- Logs are daily files containing JSON records, one per line
+
+### Staff Deletion
+- Only admins can delete other staff members
+- Admin must re-authenticate with their password to authorize staff removal
+- Deletion is logged to activity logs with admin identity and removed staff info
+---
 - **MongoDB Community Server** (must be installed locally)
 
 ---
